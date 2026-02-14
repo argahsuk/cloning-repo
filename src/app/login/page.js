@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react"; // 1. Import Suspense
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+// 2. Move all logic into a separate component
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard";
@@ -37,6 +38,7 @@ export default function LoginPage() {
   }
 
   const inputClass = "w-full border border-input bg-background rounded-lg px-3 py-2 focus:ring-2 focus:ring-ring focus:border-primary";
+  
   return (
     <div className="max-w-md mx-auto">
       <h1 className="text-2xl font-bold text-foreground mb-6">Log in</h1>
@@ -63,5 +65,14 @@ export default function LoginPage() {
         <Link href="/register" className="text-primary hover:underline">Register</Link>
       </p>
     </div>
+  );
+}
+
+// 3. Export the main page wrapped in Suspense
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="text-center mt-10">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }
