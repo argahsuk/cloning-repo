@@ -65,4 +65,4 @@ Transparent community–government feedback platform. Residents report civic iss
 [![Watch the video](https://drive.google.com/uc?export=view&id=1-GuBlgRDObsZDbQ1jSMsyai6tgAPLsLR)](https://drive.google.com/file/d/1fgshd3TQVM4TIMREs79oHUclmjMztxcf/view?usp=sharing)
 
 
-
+[Deployment Link:](https://cibi-beige.vercel.app/)
