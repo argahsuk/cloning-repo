@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# CivicBridge
 
-## Getting Started
+Transparent community–government feedback platform. Residents report civic issues; officials update status; everyone sees the full lifecycle with SLA tracking and community upvoting.
 
-First, run the development server:
+## Tech stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Next.js 14** (App Router), JavaScript
+- **Tailwind CSS**
+- **MongoDB Atlas** + Mongoose
+- **Custom session auth** (HTTP-only cookies, MongoDB session store, bcrypt)
+- **Vercel** deployment
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+1. Clone and install:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+   ```bash
+   npm install
+   ```
 
-## Learn More
+2. Copy env and set variables:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   cp .env.example .env.local
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   - `MONGODB_URI`: MongoDB Atlas connection string
+   - `SESSION_SECRET`: Long random string for session security
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+3. Run dev server:
 
-## Deploy on Vercel
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. Open [http://localhost:3000](http://localhost:3000).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Demo flow
+
+1. **Register** as a resident → submit an issue (title, description, category, severity, optional image/lat-lng).
+2. **Dashboard** → see all issues, filter by category/severity/status, sort by newest / oldest / upvotes. Open an issue → view timeline, SLA, upvote (when logged in).
+3. **Register** (or use another account) as an **official** → log in.
+4. **Official dashboard** → view issues, filter by status, update status (dropdown + note + optional resolution image). Check **analytics**: total/open/resolved, avg resolution time, top category, trending issue.
+5. **Map view** (Dashboard → Map view) → issues with lat/lng shown on a Leaflet map.
+
+## Deployment (Vercel)
+
+1. Push to GitHub and import the project in Vercel.
+2. Set environment variables: `MONGODB_URI`, `SESSION_SECRET`.
+3. Deploy.
+
+## Features
+
+- **Auth**: Register (resident/official), login, session in MongoDB, HTTP-only cookie, 7-day expiry.
+- **Issues**: Submit (resident), list with filters/sort, detail with status timeline, SLA timer (green &lt;24h, yellow 24–48h, red 48h+), upvote (once per user).
+- **Officials**: Update status (state machine), add notes, upload resolution image; analytics (totals, open, resolved, avg resolution time, top category, trending).
