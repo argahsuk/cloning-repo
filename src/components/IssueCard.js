@@ -10,10 +10,6 @@ import { getSlaInfo, getSlaColorClass } from "@/lib/sla";
 import { ThumbsUp, Clock, MapPin, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/**
- * IssueCard Component
- * Wide layout with restored fixed height and pill-shaped SLA badge.
- */
 export function IssueCard({ issue, maxUpvotes = 0 }) {
   const sla = getSlaInfo(issue.createdAt);
   
@@ -23,21 +19,23 @@ export function IssueCard({ issue, maxUpvotes = 0 }) {
     (issue.upvoteCount || 0) > 0;
     
   const isResolved = issue.status === "Resolved" || issue.status === "Verified";
-  const creatorName = issue.creator?.name || issue.createdBy?.name || "Anonymous";
+  const creatorName = issue.createdBy?.name || issue.creator?.name || "Anonymous";
 
   return (
-    <Link href={`/issues/${issue._id}`} className="block w-full">
+    <Link href={`/issue/${issue._id}`} className="block w-full">
       <Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-primary/30 border-slate-200 bg-white">
-        {/* Restored fixed height to h-[160px] to prevent it from looking "long" */}
-        <div className="flex flex-row h-[160px]">
+        {/* STRICT FIXED HEIGHT: h-[165px] 
+            This ensures every card in your grid is identical.
+        */}
+        <div className="flex flex-row h-[165px]">
           
-          {/* LEFT SIDE: IMAGE - Made wider (w-48) to contribute to the "Wide" feel */}
-          <div className="relative w-36 sm:w-48 shrink-0 bg-slate-100 overflow-hidden border-r">
+          {/* LEFT SIDE: Image */}
+          <div className="relative w-32 sm:w-52 shrink-0 bg-slate-100 overflow-hidden border-r">
             {issue.image ? (
               <img
                 src={issue.image}
                 alt={issue.title}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-slate-300">
@@ -55,17 +53,22 @@ export function IssueCard({ issue, maxUpvotes = 0 }) {
             )}
           </div>
 
-          {/* RIGHT SIDE: CONTENT - Increased horizontal padding for width */}
-          <div className="flex flex-1 flex-col min-w-0">
-            <CardContent className="p-4 sm:px-6 flex flex-col h-full justify-between">
+          {/* RIGHT SIDE: Content */}
+          <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
+            <CardContent className="p-4 sm:px-6 flex flex-col h-full relative">
               
-              {/* Top Section */}
-              <div className="space-y-1.5">
-                <h3 className="line-clamp-1 text-base font-semibold leading-snug text-foreground group-hover:text-primary transition-colors">
+              {/* TOP: Title and Badges */}
+              <div className="space-y-2">
+                <h3 className="line-clamp-1 text-base font-semibold leading-tight text-foreground group-hover:text-primary transition-colors">
                   {issue.title}
                 </h3>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary" className="text-xs font-normal px-2 bg-slate-100">
+                
+                {/* Tag Container: 
+                   h-12 and overflow-hidden ensures that if tags wrap to a 3rd line, 
+                   they don't push the footer down.
+                */}
+                <div className="flex flex-wrap items-center gap-1.5 h-[48px] overflow-hidden content-start">
+                  <Badge variant="secondary" className="text-[10px] font-normal px-2 bg-slate-100 whitespace-nowrap">
                     {issue.category}
                   </Badge>
                   <SeverityBadge severity={issue.severity} />
@@ -73,19 +76,18 @@ export function IssueCard({ issue, maxUpvotes = 0 }) {
                 </div>
               </div>
 
-              {/* Bottom Metrics & Metadata */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex items-center gap-6">
-                    <span className="flex items-center gap-1.5 font-medium">
+              {/* BOTTOM: Pushed to the base */}
+              <div className="mt-auto">
+                <div className="flex items-center justify-between text-sm text-muted-foreground pb-2">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1.5 font-medium text-slate-700">
                       <ThumbsUp className="h-3.5 w-3.5" />
                       {issue.upvoteCount || 0}
                     </span>
                     
                     {!isResolved && (
-                      /* FIXED: px-4 and rounded-full creates the non-popped pill shape */
                       <span className={cn(
-                        "flex items-center gap-1.5 rounded-full px-4 py-0.5 text-xs font-medium border whitespace-nowrap", 
+                        "flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-medium border whitespace-nowrap", 
                         getSlaColorClass(sla.color)
                       )}>
                         <Clock className="h-3 w-3" />
@@ -95,26 +97,22 @@ export function IssueCard({ issue, maxUpvotes = 0 }) {
                   </div>
 
                   {issue.location && (
-                    <span className="hidden md:flex items-center gap-1 text-xs">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {issue.location.lat.toFixed(2)}, {issue.location.lng.toFixed(2)}
+                    <span className="hidden xl:flex items-center gap-1 text-[10px] opacity-70">
+                      <MapPin className="h-3 w-3" />
+                      {issue.location.lat.toFixed(1)}, {issue.location.lng.toFixed(1)}
                     </span>
                   )}
                 </div>
 
-                {/* Footer exactly as requested */}
-                <p className="text-xs text-muted-foreground pt-2 border-t border-slate-50">
+                <p className="text-[10px] text-muted-foreground border-t border-slate-100 pt-2 truncate">
                   Reported by <span className="font-medium text-slate-600">{creatorName}</span> &middot; {new Date(issue.createdAt).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
-                    year: "numeric",
                   })}
                 </p>
               </div>
-
             </CardContent>
           </div>
-          
         </div>
       </Card>
     </Link>

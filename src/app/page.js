@@ -40,7 +40,7 @@ export default function Home() {
               Report an Issue <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
-              href="/issues"
+              href="https://www.google.com/maps"
               className="bg-white border-2 border-slate-200 hover:border-emerald-500 text-slate-700 px-8 py-4 rounded-full font-bold transition flex items-center gap-2"
             >
               <Globe className="w-5 h-5 text-emerald-500" /> View Map

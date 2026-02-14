@@ -8,19 +8,42 @@ export default function Nav() {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // Added loading state
+
+  const checkSession = async () => {
+    try {
+      const res = await fetch("/api/auth/session", { cache: 'no-store' });
+      const data = await res.json();
+      if (data.user) {
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetch("/api/auth/session", { credentials: "include" })
-      .then((r) => r.json())
-      .then((data) => setUser(data.user))
-      .catch(() => setUser(null));
-  }, [pathname]);
+    checkSession();
+  }, [pathname]); // Re-check whenever page changes
 
   async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
-    router.push("/");
-    router.refresh();
+    try {
+      setLoading(true); // Show loading while logging out
+      await fetch("/api/auth/logout", { method: "POST" });
+      setUser(null);
+      
+      // Force a full refresh to clear any server-side caches
+      router.push("/");
+      router.refresh(); 
+    } catch (err) {
+      console.error("Logout failed", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -29,6 +52,7 @@ export default function Nav() {
         <Link href="/" className="font-bold text-lg text-blue-300 hover:text-white transition">
           CivicBridge
         </Link>
+        
         <div className="flex items-center gap-4">
           <Link
             href="/dashboard"
@@ -36,48 +60,56 @@ export default function Nav() {
           >
             Dashboard
           </Link>
-          {user ? (
+
+          {/* Loading Guard: Prevents showing the wrong buttons 
+            while the session is being verified.
+          */}
+          {!loading && (
             <>
-              {user.role === "resident" && (
-                <Link
-                  href="/submit"
-                  className="text-slate-300 hover:text-white transition text-sm font-medium"
-                >
-                  Report Issue
-                </Link>
+              {user ? (
+                <>
+                  {user.role === "resident" && (
+                    <Link
+                      href="/submit"
+                      className="text-slate-300 hover:text-white transition text-sm font-medium"
+                    >
+                      Report Issue
+                    </Link>
+                  )}
+                  {user.role === "official" && (
+                    <Link
+                      href="/official"
+                      className="text-slate-300 hover:text-white transition text-sm font-medium"
+                    >
+                      Official Dashboard
+                    </Link>
+                  )}
+                  <span className="text-slate-400 text-sm hidden md:inline">
+                    {user.name?.split(" ")[0]} ({user.role})
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="text-slate-400 hover:text-red-300 transition text-sm font-medium"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-slate-300 hover:text-white transition text-sm font-medium"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-md text-sm font-medium transition"
+                  >
+                    Register
+                  </Link>
+                </>
               )}
-              {user.role === "official" && (
-                <Link
-                  href="/official"
-                  className="text-slate-300 hover:text-white transition text-sm font-medium"
-                >
-                  Official Dashboard
-                </Link>
-              )}
-              <span className="text-slate-400 text-sm">
-                {user.name.split(" ")[0]} ({user.role})
-              </span>
-              <button
-                onClick={handleLogout}
-                className="text-slate-400 hover:text-red-300 transition text-sm"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="text-slate-300 hover:text-white transition text-sm font-medium"
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-md text-sm font-medium transition"
-              >
-                Register
-              </Link>
             </>
           )}
         </div>
